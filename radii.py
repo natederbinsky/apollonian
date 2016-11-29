@@ -10,14 +10,12 @@ def _sub(u):
 def generate(d, iterations):
     lookup = {}
     maxlength = 1
-    units = [(1,1,1),]
-    for x in range(d+1):
-        units.append((0, 1, 1))
+    units = [(1,1,1),] + [(0, 1, 1) for x in range(d+1)]
     
     last = units[:]
     for x in range(iterations-1):
         newunits = []
-        for unit in units:
+        for unit in last:
             Node = None
             if unit in lookup:
                 node = lookup[unit]
