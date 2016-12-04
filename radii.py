@@ -4,28 +4,38 @@ from __future__ import print_function
 
 import sys
 
-def _sub(u):
-    return ((u[0], u[1]), (u[0], u[2]), (u[1], u[2]))
+# returns a tuple of tuples, each of length d via d+1 choose d
+def _subcoord(d):
+    return (tuple(tuple(y for y in range(d+1) if x is not y) for x in reversed(range(d+1))))
+    
+# returns a tuple with the values
+# of t according to the indices in c[oordinates]
+def _coordvals(t, c):
+    return tuple(t[x] for x in c)
+
+# returns sub-values of tuple t
+# via a list of coordinates, cl
+def _subvals(t, cl):
+    return tuple(_coordvals(t, c) for c in cl)
+    
+# find u in lookup,
+# if not found, add with unique value (lookup length+2)
+def _node(u, lookup):
+    node = lookup.get(u, None)
+    if node is None:
+        node = len(lookup)+2
+        lookup[u] = node
+        
+    return node
 
 def generate(d, iterations):
     lookup = {}
-    maxlength = 1
-    units = [(1,1,1),] + [(0, 1, 1) for x in range(d+1)]
+    units = [(1,)*(d+1)] + [(0,)+(1,)*(d) for x in range(d+1)]
+    coordinates = _subcoord(d)
     
-    last = units[:]
+    last = units
     for x in range(iterations-1):
-        newunits = []
-        for unit in last:
-            Node = None
-            if unit in lookup:
-                node = lookup[unit]
-            else:
-                maxlength += 1
-                node = maxlength
-                lookup[unit] = node
-            
-            for sub in _sub(unit):
-                newunits.append(tuple(sorted((node, sub[0], sub[1]))))
+        newunits = tuple(tuple(sorted((_node(lastunit, lookup),) + subunit)) for lastunit in last for subunit in _subvals(lastunit, coordinates))
         units += newunits
         last = newunits
         
@@ -34,10 +44,8 @@ def generate(d, iterations):
 def groups(units):
     counters = {}
     for u in units:
-        if u in counters:
-            counters[u] += 1
-        else:
-            counters[u] = 1
+        counters[u] = counters.get(u, 0) + 1
+        
     return counters
 
 def main(argv):
