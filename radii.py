@@ -8,6 +8,7 @@ from math import sqrt
 from collections import Counter
 from operator import itemgetter
 
+
 def compute_curvature(A, B_c, C_c, b, include_neg):
     sum_b = sum(b)
     B = B_c * sum_b
