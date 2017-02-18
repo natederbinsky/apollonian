@@ -10,6 +10,7 @@ import edu.princeton.cs.introcs.Draw;
 public class ApollonianSpheres {
 
 	private static final double THRESH = 1.0E-3;
+	private static final int[] MULT = {-1, 1};
 
 	private static class Element {
 		final public int iteration;
@@ -95,8 +96,14 @@ public class ApollonianSpheres {
 			}
 		}
 	}
+	
+	private static void _computeCoord(int[] c, double[] combo, double[][] qr) {
+		for (int i=0; i<c.length; i++) {
+			combo[i] = qr[i][0] + MULT[c[i]] * qr[i][1];
+		}
+	}
 
-	private static void computePosition(int d, List<Element> elements, int[] indexes, double[][] qr) {
+	private static void computePosition(int d, List<Element> elements, int[] indexes, double[][] qr, int[][] combos, double[] combo, double[] exp) {
 		final Element nE = elements.get(indexes[d + 1]);
 		final double newB = nE.b;
 		final double A = (1 - 1. / d) * newB * newB;
@@ -142,62 +149,38 @@ public class ApollonianSpheres {
 				nE.x[i] = qr[i - 1][0];
 			}
 		} else {
-			// FIXME
-			// Very 2D specific and slightly
-			// inefficient at this point,
-			// but I believe correct!
-
-			final double xminus = qr[0][0] - qr[0][1];
-			final double xplus = qr[0][0] + qr[0][1];
-			final double yminus = qr[1][0] - qr[1][1];
-			final double yplus = qr[1][0] + qr[1][1];
+			Double bestDiff = null;
+			int[] bestC = null;
 			
-			final Element e0 = elements.get(indexes[0]);
-			final Element e1 = elements.get(indexes[1]);
-			final Element e2 = elements.get(indexes[2]);
-			
-			final double expected0 = ((e0.r<0)?(Math.abs(e0.r)-nE.r):(e0.r+nE.r));
-			final double expected1 = ((e1.r<0)?(Math.abs(e1.r)-nE.r):(e1.r+nE.r));
-			final double expected2 = ((e2.r<0)?(Math.abs(e2.r)-nE.r):(e2.r+nE.r));
-			
-			final double d00_0 = Math.sqrt(Math.pow(xminus-e0.x[1], 2)+Math.pow(yminus-e0.x[2], 2));
-			final double d00_1 = Math.sqrt(Math.pow(xminus-e1.x[1], 2)+Math.pow(yminus-e1.x[2], 2));
-			final double d00_2 = Math.sqrt(Math.pow(xminus-e2.x[1], 2)+Math.pow(yminus-e2.x[2], 2));
-			final double diff00 = Math.abs(expected0-d00_0) + Math.abs(expected1-d00_1) + Math.abs(expected2-d00_2);
-			
-			final double d01_0 = Math.sqrt(Math.pow(xminus-e0.x[1], 2)+Math.pow(yplus-e0.x[2], 2));
-			final double d01_1 = Math.sqrt(Math.pow(xminus-e1.x[1], 2)+Math.pow(yplus-e1.x[2], 2));
-			final double d01_2 = Math.sqrt(Math.pow(xminus-e2.x[1], 2)+Math.pow(yplus-e2.x[2], 2));
-			final double diff01 = Math.abs(expected0-d01_0) + Math.abs(expected1-d01_1) + Math.abs(expected2-d01_2);
-			
-			final double d10_0 = Math.sqrt(Math.pow(xplus-e0.x[1], 2)+Math.pow(yminus-e0.x[2], 2));
-			final double d10_1 = Math.sqrt(Math.pow(xplus-e1.x[1], 2)+Math.pow(yminus-e1.x[2], 2));
-			final double d10_2 = Math.sqrt(Math.pow(xplus-e2.x[1], 2)+Math.pow(yminus-e2.x[2], 2));
-			final double diff10 = Math.abs(expected0-d10_0) + Math.abs(expected1-d10_1) + Math.abs(expected2-d10_2);
-			
-			final double d11_0 = Math.sqrt(Math.pow(xplus-e0.x[1], 2)+Math.pow(yplus-e0.x[2], 2));
-			final double d11_1 = Math.sqrt(Math.pow(xplus-e1.x[1], 2)+Math.pow(yplus-e1.x[2], 2));
-			final double d11_2 = Math.sqrt(Math.pow(xplus-e2.x[1], 2)+Math.pow(yplus-e2.x[2], 2));
-			final double diff11 = Math.abs(expected0-d11_0) + Math.abs(expected1-d11_1) + Math.abs(expected2-d11_2);
-			
-			final double x;
-			final double y;
-			if (diff00<diff01 && diff00<diff10 && diff00<diff11) {
-				x = xminus;
-				y = yminus;
-			} else if (diff01<diff10 && diff01<diff11) {
-				x = xminus;
-				y = yplus;
-			} else if (diff10<diff11) {
-				x = xplus;
-				y = yminus;
-			} else {
-				x = xplus;
-				y = yplus;
+			for (int i=0; i<exp.length; i++) {
+				final Element e = elements.get(indexes[i]);
+				exp[i] = ((e.r<0)?(Math.abs(e.r)-nE.r):(e.r+nE.r));
 			}
 			
-			nE.x[1] = x;
-			nE.x[2] = y;
+			for (int[] c : combos) {
+				_computeCoord(c, combo, qr);
+				
+				double diffSum = 0.;
+				for (int i=0; i<exp.length; i++) {
+					final Element e = elements.get(indexes[i]);
+					double sum2 = 0.;
+					for (int j=0; j<c.length; j++) {
+						final double cDiff = e.x[1+j] - combo[j];
+						sum2 += cDiff*cDiff;
+					}
+					diffSum += Math.abs(Math.sqrt(sum2) - exp[i]);
+				}
+				
+				if (bestDiff==null || diffSum<bestDiff) {
+					bestDiff = diffSum;
+					bestC = c;
+				}
+			}
+			
+			_computeCoord(bestC, combo, qr);
+			for (int i=0; i<combo.length; i++) {
+				nE.x[i+1] = combo[i];
+			}
 		}
 	}
 
@@ -225,6 +208,16 @@ public class ApollonianSpheres {
 			final double A = ((double) d - 1) / ((double) d);
 			final double B_c = -2.0 / d;
 			final double C_c = 1.0 / d;
+			
+			final double[] exp = new double[d+1];
+			final double[] combo = new double[d];
+			final int[][] combos = new int[(int) Math.pow(2, d)][d];
+			for (int i=0; i<combos.length; i++) {
+				final String s = String.format("%0" + d + "d", Integer.valueOf(Integer.toString(i, 2)));
+				for (int j=0; j<d; j++) {
+					combos[i][j] = s.charAt(j) - '0';
+				}
+			}
 
 			{
 				final int[] indexes = getFromPool(d, indexPool);
@@ -243,7 +236,7 @@ public class ApollonianSpheres {
 
 					for (int a : added) {
 						l[d + 1] = a;
-						computePosition(d, elements, l, qr);
+						computePosition(d, elements, l, qr, combos, combo, exp);
 
 						for (int i = 0; i <= d; i++) {
 							final int[] indexes = getFromPool(d, indexPool);
@@ -272,7 +265,7 @@ public class ApollonianSpheres {
 	}
 
 	public static void main(String[] args) {
-		final int iterations = 4;
+		final int iterations = 5;
 		final int d = 2;
 
 		final int scale = 3;
@@ -308,7 +301,8 @@ public class ApollonianSpheres {
 		final Color[] colors = { 
 			Color.BLACK, Color.ORANGE, Color.BLUE, 
 			Color.GRAY, Color.RED, Color.GREEN,
-			Color.MAGENTA, Color.YELLOW, Color.CYAN 
+			Color.MAGENTA, Color.YELLOW, Color.CYAN,
+			Color.PINK,
 		};
 
 		for (int i=0; i<elements.size(); i++) {
@@ -324,7 +318,7 @@ public class ApollonianSpheres {
 //			System.out.println(e);
 		}
 		w.setPenColor(Color.BLACK);
-		w.text(-(2*scale/3.), -scale+(scale/20.), String.format("Iterations: %d, Circles: %d", iterations, elements.size()));
+		w.textLeft(-scale+(scale/20.), -scale+(scale/20.), String.format("Iterations: %d, Circles: %d", iterations, elements.size()));
 	}
 
 }
