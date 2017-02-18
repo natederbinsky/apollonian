@@ -143,64 +143,61 @@ public class ApollonianSpheres {
 			}
 		} else {
 			// FIXME
-			// Very much a 2D hack at this point
-			// appears to work for many cases
-			// but inefficient and not quite right
+			// Very 2D specific and slightly
+			// inefficient at this point,
+			// but I believe correct!
 
 			final double xminus = qr[0][0] - qr[0][1];
 			final double xplus = qr[0][0] + qr[0][1];
 			final double yminus = qr[1][0] - qr[1][1];
 			final double yplus = qr[1][0] + qr[1][1];
-
-			final int[] counts = new int[4];
-
-			for (Element e : elements) {
-				if (e == nE)
-					continue;
-
-				final double rSum;
-				if (e.r < 0) {
-					rSum = Math.abs(e.r) - nE.r;
-				} else {
-					rSum = e.r + nE.r;
-				}
-
-				final double d00 = Math.sqrt(Math.pow(e.x[1] - xminus, 2) + Math.pow(e.x[2] - yminus, 2));
-				final double d01 = Math.sqrt(Math.pow(e.x[1] - xminus, 2) + Math.pow(e.x[2] - yplus, 2));
-				final double d10 = Math.sqrt(Math.pow(e.x[1] - xplus, 2) + Math.pow(e.x[2] - yminus, 2));
-				final double d11 = Math.sqrt(Math.pow(e.x[1] - xplus, 2) + Math.pow(e.x[2] - yplus, 2));
-
-				final double diff00 = (d00 + THRESH) - rSum;
-				final double diff01 = (d01 + THRESH) - rSum;
-				final double diff10 = (d10 + THRESH) - rSum;
-				final double diff11 = (d11 + THRESH) - rSum;
-
-				if (diff00 > 0)
-					counts[0]++;
-				if (diff01 > 0)
-					counts[1]++;
-				if (diff10 > 0)
-					counts[2]++;
-				if (diff11 > 0)
-					counts[3]++;
+			
+			final Element e0 = elements.get(indexes[0]);
+			final Element e1 = elements.get(indexes[1]);
+			final Element e2 = elements.get(indexes[2]);
+			
+			final double expected0 = ((e0.r<0)?(Math.abs(e0.r)-nE.r):(e0.r+nE.r));
+			final double expected1 = ((e1.r<0)?(Math.abs(e1.r)-nE.r):(e1.r+nE.r));
+			final double expected2 = ((e2.r<0)?(Math.abs(e2.r)-nE.r):(e2.r+nE.r));
+			
+			final double d00_0 = Math.sqrt(Math.pow(xminus-e0.x[1], 2)+Math.pow(yminus-e0.x[2], 2));
+			final double d00_1 = Math.sqrt(Math.pow(xminus-e1.x[1], 2)+Math.pow(yminus-e1.x[2], 2));
+			final double d00_2 = Math.sqrt(Math.pow(xminus-e2.x[1], 2)+Math.pow(yminus-e2.x[2], 2));
+			final double diff00 = Math.abs(expected0-d00_0) + Math.abs(expected1-d00_1) + Math.abs(expected2-d00_2);
+			
+			final double d01_0 = Math.sqrt(Math.pow(xminus-e0.x[1], 2)+Math.pow(yplus-e0.x[2], 2));
+			final double d01_1 = Math.sqrt(Math.pow(xminus-e1.x[1], 2)+Math.pow(yplus-e1.x[2], 2));
+			final double d01_2 = Math.sqrt(Math.pow(xminus-e2.x[1], 2)+Math.pow(yplus-e2.x[2], 2));
+			final double diff01 = Math.abs(expected0-d01_0) + Math.abs(expected1-d01_1) + Math.abs(expected2-d01_2);
+			
+			final double d10_0 = Math.sqrt(Math.pow(xplus-e0.x[1], 2)+Math.pow(yminus-e0.x[2], 2));
+			final double d10_1 = Math.sqrt(Math.pow(xplus-e1.x[1], 2)+Math.pow(yminus-e1.x[2], 2));
+			final double d10_2 = Math.sqrt(Math.pow(xplus-e2.x[1], 2)+Math.pow(yminus-e2.x[2], 2));
+			final double diff10 = Math.abs(expected0-d10_0) + Math.abs(expected1-d10_1) + Math.abs(expected2-d10_2);
+			
+			final double d11_0 = Math.sqrt(Math.pow(xplus-e0.x[1], 2)+Math.pow(yplus-e0.x[2], 2));
+			final double d11_1 = Math.sqrt(Math.pow(xplus-e1.x[1], 2)+Math.pow(yplus-e1.x[2], 2));
+			final double d11_2 = Math.sqrt(Math.pow(xplus-e2.x[1], 2)+Math.pow(yplus-e2.x[2], 2));
+			final double diff11 = Math.abs(expected0-d11_0) + Math.abs(expected1-d11_1) + Math.abs(expected2-d11_2);
+			
+			final double x;
+			final double y;
+			if (diff00<diff01 && diff00<diff10 && diff00<diff11) {
+				x = xminus;
+				y = yminus;
+			} else if (diff01<diff10 && diff01<diff11) {
+				x = xminus;
+				y = yplus;
+			} else if (diff10<diff11) {
+				x = xplus;
+				y = yminus;
+			} else {
+				x = xplus;
+				y = yplus;
 			}
-
-			final int total = elements.size() - 2;
-			if (counts[0] >= total) {
-				nE.x[1] = xminus;
-				nE.x[2] = yminus;
-			} else if (counts[1] >= total) {
-				nE.x[1] = xminus;
-				nE.x[2] = yplus;
-			} else if (counts[2] >= total) {
-				nE.x[1] = xplus;
-				nE.x[2] = yminus;
-			} else if (counts[3] >= total) {
-				nE.x[1] = xplus;
-				nE.x[2] = yplus;
-			}
-
-			// System.out.printf("boo: %s%n", Arrays.toString(counts));
+			
+			nE.x[1] = x;
+			nE.x[2] = y;
 		}
 	}
 
@@ -275,7 +272,7 @@ public class ApollonianSpheres {
 	}
 
 	public static void main(String[] args) {
-		final int iterations = 3;
+		final int iterations = 4;
 		final int d = 2;
 
 		final int scale = 3;
@@ -291,8 +288,8 @@ public class ApollonianSpheres {
 
 		//
 
-		final Draw w = new Draw();
-		w.setCanvasSize(900, 900);
+		final Draw w = new Draw("Apollonia!");
+		w.setCanvasSize(600, 600);
 		w.setXscale(-scale, scale);
 		w.setYscale(-scale, scale);
 		w.clear(Color.WHITE);
@@ -308,17 +305,26 @@ public class ApollonianSpheres {
 
 		//
 
-		final Color[] colors = { Color.BLACK, Color.ORANGE, Color.BLUE, Color.GRAY, Color.RED, Color.GREEN,
-				Color.MAGENTA, Color.YELLOW, Color.CYAN };
+		final Color[] colors = { 
+			Color.BLACK, Color.ORANGE, Color.BLUE, 
+			Color.GRAY, Color.RED, Color.GREEN,
+			Color.MAGENTA, Color.YELLOW, Color.CYAN 
+		};
 
-		for (Element e : elements) {
+		for (int i=0; i<elements.size(); i++) {
+			final Element e = elements.get(i);
 			final double r = (e.r < 0) ? -e.r : e.r;
 
 			w.setPenColor(colors[e.iteration]);
-
 			w.circle(e.x[1], e.x[2], r);
-			System.out.println(e);
+			
+//			w.setPenColor(Color.BLACK);
+//			w.text(e.x[1], e.x[2], String.format("%d", i));
+			
+//			System.out.println(e);
 		}
+		w.setPenColor(Color.BLACK);
+		w.text(-(2*scale/3.), -scale+(scale/20.), String.format("Iterations: %d, Circles: %d", iterations, elements.size()));
 	}
 
 }
