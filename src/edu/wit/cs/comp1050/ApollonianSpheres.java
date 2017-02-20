@@ -263,21 +263,55 @@ public class ApollonianSpheres {
 			}
 		}
 	}
+	
+	private static double[] getXY(double r1, double r2, double r3) {
+		final double a = r2 + r3;
+		final double b = r1 + r3;
+		final double c = r1 + r2;
+		
+		final double x = (b*b + c*c - a*a) / (2 * c);
+		final double y = Math.sqrt(b*b - x*x);
+		
+		return new double[] {x, y};
+	}
+	
+	private static double[] getOffset(double x1, double y1, double x2, double y2, double x3, double y3) {
+		final double cx = 1./3.*(x1 + x2 + x3);
+		final double cy = 1./3.*(y1 + y2 + y3);
+		
+		return new double[] {-cx, -cy};
+	}
 
 	public static void main(String[] args) {
 		final int iterations = 5;
 		final int d = 2;
 
 		final int scale = 3;
+		
+		//
+		
+		final double r1 = 1.;
+		final double r2 = 1.;
+		final double r3 = 1.;
+		
+		final double x1 = 0.;
+		final double y1 = 0.;
+		final double x2 = r1 + r2;
+		final double y2 = 0.;
+		
+		final double[] xy = getXY(r1, r2, r3);
+		final double[] o = getOffset(x1, y1, x2, y2, xy[0], xy[1]);
 
 		final ArrayList<Element> elements = new ArrayList<>();
-		elements.add(new Element(d, 0, 1., 1.15470, 0.));
-		elements.add(new Element(d, 0, 1., -0.57735, -1.));
-		elements.add(new Element(d, 0, 1., -0.57735, 1.));
+		elements.add(new Element(d, 0, r1, o[0] + x1, o[1] + y1));
+		elements.add(new Element(d, 0, r2, o[0] + x2, o[1] + y2));
+		elements.add(new Element(d, 0, r3, o[0] + xy[0], o[1] + xy[1]));
 
 		//
 
+		System.out.print("Generating... ");
 		generate(d, elements, iterations);
+		System.out.println("done.");
 
 		//
 
