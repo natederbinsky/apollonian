@@ -283,16 +283,26 @@ public class ApollonianSpheres {
 	}
 
 	public static void main(String[] args) {
-		final int iterations = 5;
+		final int iterations = 6;
 		final int d = 2;
 
 		final int scale = 3;
 		
 		//
 		
-		final double r1 = 1.;
-		final double r2 = 1.;
-		final double r3 = 1.;
+		final double m;
+		final double[] c;
+		
+//		c = new double[] {1., 1., 1}; m = 1.;
+//		c = new double[] {25., 25., 28.}; m = 20.;
+		c = new double[] {5., 8., 8.}; m = 6.;
+//		c = new double[] {10., 15., 19.}; m = 6.;
+//		c = new double[] {23., 27., 18.}; m = 16.;
+//		c = new double[] {2., 2., 3.}; m = 1.; // interesting... negative flip?
+		
+		final double r1 = m*1./c[0];
+		final double r2 = m*1./c[1];
+		final double r3 = m*1./c[2];
 		
 		final double x1 = 0.;
 		final double y1 = 0.;
