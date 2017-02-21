@@ -1,4 +1,4 @@
-package edu.wit.cs.comp1050;
+package edu.wit.cs.comp1050.legacy;
 
 import java.awt.Color;
 import java.util.ArrayList;
