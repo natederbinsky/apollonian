@@ -112,7 +112,13 @@ public class Gasket {
 
 			for (int i = 0; i < exp.length; i++) {
 				final Element e = elements.get(indexes[i]);
-				exp[i] = ((e.r < 0) ? (Math.abs(e.r) - nE.r) : (e.r + nE.r));
+				if (e.r < 0) {
+					exp[i] = Math.abs(e.r) - nE.r;
+				} else if (nE.r < 0) {
+					exp[i] = Math.abs(nE.r) - e.r;
+				} else {
+					exp[i] = e.r + nE.r;
+				}
 			}
 
 			for (int[] c : combos) {
