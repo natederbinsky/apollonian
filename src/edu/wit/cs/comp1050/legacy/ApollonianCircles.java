@@ -43,7 +43,7 @@ public class ApollonianCircles {
 //		c = new double[] {5., 8., 8.}; m = 6.;
 //		c = new double[] {10., 15., 19.}; m = 6.;
 //		c = new double[] {23., 27., 18.}; m = 16.;
-//		c = new double[] {2., 2., 3.}; m = 1.; // interesting... negative flip?
+//		c = new double[] {2., 2., 3.}; m = 1.;
 		
 		final double r1 = m*1./c[0];
 		final double r2 = m*1./c[1];

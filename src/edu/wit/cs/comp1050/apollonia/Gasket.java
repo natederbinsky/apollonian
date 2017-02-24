@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Stack;
 
 public class Gasket {
-	private static final double THRESH = 1.0E-3;
+	private static final double THRESH = 1.0E-10;
 	private static final int[] MULT = { -1, 1 };
 
 	private static void addElement(int iteration, List<Element> elements, List<Integer> added, int d,
@@ -61,7 +61,7 @@ public class Gasket {
 	}
 
 	private static void computePosition(int d, List<Element> elements, int[] indexes, double[][] qr, int[][] combos,
-			double[] combo, double[] exp) {
+			double[] combo, double[] combo2, double[] exp) {
 		final Element nE = elements.get(indexes[d + 1]);
 		final double newB = nE.b;
 		final double A = (1 - 1. / d) * newB * newB;
@@ -110,15 +110,20 @@ public class Gasket {
 			Double bestDiff = null;
 			int[] bestC = null;
 
+			double expSum = 0.;
 			for (int i = 0; i < exp.length; i++) {
 				final Element e = elements.get(indexes[i]);
+				
+				final double expV;
 				if (e.r < 0) {
-					exp[i] = Math.abs(e.r) - nE.r;
+					expV = Math.abs(e.r) - nE.r;
 				} else if (nE.r < 0) {
-					exp[i] = Math.abs(nE.r) - e.r;
+					expV = Math.abs(nE.r) - e.r;
 				} else {
-					exp[i] = e.r + nE.r;
+					expV = e.r + nE.r;
 				}
+				exp[i] = expV;
+				expSum += expV;
 			}
 
 			for (int[] c : combos) {
@@ -134,10 +139,45 @@ public class Gasket {
 					}
 					diffSum += Math.abs(Math.sqrt(sum2) - exp[i]);
 				}
-
+				
 				if (bestDiff == null || diffSum < bestDiff) {
-					bestDiff = diffSum;
-					bestC = c;
+					
+					// rare edge case to break symmetries
+					boolean go = true;
+					if ((bestDiff!= null) && (diffSum/expSum<THRESH && bestDiff/expSum<THRESH)) {
+						_computeCoord(bestC, combo2, qr);
+						
+						final double pDistance;
+						{
+							double pSum = 0.;
+							for (int i = 0; i < c.length; i++) {
+								final double pDiff = combo[i] - combo2[i];
+								pSum += pDiff*pDiff;
+							}
+							pDistance = Math.sqrt(pSum);
+						}
+								
+						if (pDistance>THRESH) {
+							for (Element e : elements) {
+								double eSum = 0.;
+								for (int i = 0; i < c.length; i++) {
+									final double eDiff = e.x[1+i] - combo[i];
+									eSum += eDiff*eDiff;
+								}
+								final double eDistance = Math.sqrt(eSum);
+								if (eDistance < THRESH) {
+									go = false;
+								}
+							}
+						} else {
+							go = false;
+						}
+					}
+					
+					if (go) {
+						bestDiff = diffSum;
+						bestC = c;
+					}
 				}
 			}
 
@@ -175,6 +215,7 @@ public class Gasket {
 
 			final double[] exp = new double[d + 1];
 			final double[] combo = new double[d];
+			final double[] combo2 = new double[d];
 			final int[][] combos = new int[(int) Math.pow(2, d)][d];
 			for (int i = 0; i < combos.length; i++) {
 				final String s = String.format("%0" + d + "d", Integer.valueOf(Integer.toString(i, 2)));
@@ -200,7 +241,7 @@ public class Gasket {
 
 					for (int a : added) {
 						l[d + 1] = a;
-						computePosition(d, elements, l, qr, combos, combo, exp);
+						computePosition(d, elements, l, qr, combos, combo, combo2, exp);
 
 						for (int i = 0; i <= d; i++) {
 							final int[] indexes = getFromPool(d, indexPool);
