@@ -43,6 +43,8 @@ public class Spheres {
 		Gasket.generate(d, elements, iterations);
 		
 		for (Element e : elements) {
+			System.out.println(String.format("apollonian(%.2f, %.2f, %.2f, %.2f, %d, %d, %d);", e.getX(0), e.getX(1), e.getX(2), e.getRadius(), colors[e.getIteration()].getRed(), colors[e.getIteration()].getGreen(), colors[e.getIteration()].getBlue()));
+			
 			if (e.getRadius()<=elements.get(0).getRadius()) {
 				StdDraw3D.setPenColor(colors[e.getIteration()], TRANSPARENCY);
 				StdDraw3D.sphere(e.getX(0), e.getX(1), e.getX(2), e.getRadius());
