@@ -2,6 +2,7 @@ module apollonian(x, y, z, radius, r=255, g=0, b=0, a=1) {
     color([r/255., g/255., b/255., a]) translate( [x, y, z] ) sphere(r = radius, $fn=20);
 }
 
+// calls produced via edu.wit.epic.Spheres
 module apollonia() {
 //    apollonian(0.707, 0.707, 0.707, 1.000, 255, 0, 0);
 //    apollonian(-0.707, -0.707, 0.707, 1.000, 255, 0, 0);

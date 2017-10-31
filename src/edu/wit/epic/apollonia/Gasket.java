@@ -1,15 +1,20 @@
-package edu.wit.cs.comp1050.apollonia;
+package edu.wit.epic.apollonia;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+/**
+ * Dimension-agnostic library for
+ * generating Apollonian spheres
+ * 
+ * @author derbinsky
+ */
 public class Gasket {
 	private static final double THRESH = 1.0E-10;
 	private static final int[] MULT = { -1, 1 };
 
-	private static void addElement(int iteration, List<Element> elements, List<Integer> added, int d,
-			double... curvatures) {
+	private static void addElement(int iteration, List<Element> elements, List<Integer> added, int d, double...curvatures) {
 		for (int i = 0; i < curvatures.length; i++) {
 			added.add(elements.size() + i);
 		}
@@ -200,6 +205,15 @@ public class Gasket {
 		pool.push(a);
 	}
 
+	/**
+	 * Generates an Apollonian sphere
+	 * in a specified dimension for
+	 * a specified number of iterations
+	 * 
+	 * @param d dimensions
+	 * @param elements destination list (includes seed elements)
+	 * @param iterations number of iterations for which to generate
+	 */
 	public static void generate(int d, List<Element> elements, int iterations) {
 		if (iterations > 0) {
 			final Stack<int[]> indexPool = new Stack<>();

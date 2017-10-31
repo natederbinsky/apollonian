@@ -1,9 +1,9 @@
-package edu.wit.cs.comp1050;
+package edu.wit.epic;
 
 import java.util.ArrayList;
 
-import edu.wit.cs.comp1050.apollonia.Element;
-import edu.wit.cs.comp1050.apollonia.Gasket;
+import edu.wit.epic.apollonia.Element;
+import edu.wit.epic.apollonia.Gasket;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -12,6 +12,12 @@ import javafx.scene.shape.Circle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
+/**
+ * JavaFX application for visualizing
+ * Apollonian circles
+ * 
+ * @author derbinsky
+ */
 public class CirclesFX extends Application {
 
 	public static void main(String[] args) {
@@ -35,10 +41,8 @@ public class CirclesFX extends Application {
 		
 		return new double[] {-cx, -cy};
 	}
-
-	@Override
-	public void start(Stage ps) throws Exception {
-		
+	
+	private void _start(Stage ps, Color[] colors, double[] c, double m) {
 		final int windowSize = 800;
 		final double scaleMin = -2.5;
 		final double scaleMax = 2.5;
@@ -54,17 +58,8 @@ public class CirclesFX extends Application {
 		//
 		
 		final int d = 2;
-		final int iterations = 6;
 		
-		final double m;
-		final double[] c;
-		
-		c = new double[] {1., 1., 1.}; m = 1.;
-//		c = new double[] {25., 25., 28.}; m = 20.;
-//		c = new double[] {5., 8., 8.}; m = 6.;
-//		c = new double[] {10., 15., 19.}; m = 6.;
-//		c = new double[] {23., 27., 18.}; m = 16.;
-//		c = new double[] {2., 2., 3.}; m = 1.;
+		//
 		
 		final double r1 = m*1./c[0];
 		final double r2 = m*1./c[1];
@@ -83,16 +78,9 @@ public class CirclesFX extends Application {
 		elements.add(new Element(d, 0, r2, o[0] + x2, o[1] + y2));
 		elements.add(new Element(d, 0, r3, o[0] + xy[0], o[1] + xy[1]));
 		
-		Gasket.generate(d, elements, iterations);
+		Gasket.generate(d, elements, colors.length-1);
 		
 		//
-		
-		final Color[] colors = { 
-				Color.BLACK, Color.ORANGE, Color.BLUE, 
-				Color.GRAY, Color.RED, Color.GREEN,
-				Color.MAGENTA, Color.YELLOW, Color.CYAN,
-				Color.PINK,
-			};
 
 		for (int i=0; i<elements.size(); i++) {
 			final Element e = elements.get(i);
@@ -104,7 +92,7 @@ public class CirclesFX extends Application {
 			root.getChildren().add(circ);
 		}
 		
-		root.getChildren().add(new Text(10, windowSize-10, String.format("Iterations: %d, Circles: %,d", iterations, elements.size())));
+		root.getChildren().add(new Text(10, windowSize-10, String.format("Iterations: %d, Circles: %,d", colors.length-1, elements.size())));
 		
 		//
 		
@@ -112,6 +100,43 @@ public class CirclesFX extends Application {
 		ps.setResizable(false);
 		ps.setTitle("Apollonia!");
 		ps.show();
+	}
+
+	@Override
+	public void start(Stage ps) throws Exception {
+		
+		////////////////////////////////////////////////////
+		// Step 1: Choose seed circle sizes 
+		////////////////////////////////////////////////////
+		
+		final double[] c; // initial curvatures
+		final double m; // visual multiplier
+		
+		// some initial configuration options
+		// leave only one uncommented
+		c = new double[] {1., 1., 1.}; m = 1.;
+//		c = new double[] {25., 25., 28.}; m = 20.;
+//		c = new double[] {5., 8., 8.}; m = 6.;
+//		c = new double[] {10., 15., 19.}; m = 6.;
+//		c = new double[] {23., 27., 18.}; m = 16.;
+//		c = new double[] {2., 2., 3.}; m = 1.;
+		
+		////////////////////////////////////////////////////
+		// Step 2: Set max iterations via colors
+		////////////////////////////////////////////////////
+		
+		// first = seed color
+		// iterations = colors.length - 1
+		final Color[] colors = { 
+				Color.BLACK, Color.ORANGE, Color.BLUE, 
+				Color.GRAY, Color.RED, Color.GREEN,
+				Color.MAGENTA,
+		};
+		
+		////////////////////////////////////////////////////
+		////////////////////////////////////////////////////
+		
+		_start(ps, colors, c, m);
 	}
 
 }

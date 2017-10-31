@@ -1,13 +1,18 @@
-package edu.wit.cs.comp1050;
+package edu.wit.epic;
 
 import java.awt.Color;
 import java.util.Arrays;
 
 import edu.princeton.cs.introcs.Draw;
 
+/**
+ * Application for visualizing a Fibonacci spiral
+ * 
+ * @author derbinsky
+ */
 public class FibSpiral {
 	
-	public static void fib(int iterations) {
+	private static void fib(int iterations) {
 		final int[] values = new int[iterations];
 		values[0] = 1;
 		values[1] = 1;
@@ -75,7 +80,6 @@ public class FibSpiral {
 		}
 		
 		d.setPenColor(Color.BLACK);
-//		d.setPenRadius(0.01);
 		final int[][] mult = {
 			{1, 1},
 			{-1, 1},
@@ -100,7 +104,7 @@ public class FibSpiral {
 	}
 
 	public static void main(String[] args) {
+		// set number of iterations as argument to fib
 		fib(8);
 	}
-
 }
