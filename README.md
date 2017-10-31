@@ -31,3 +31,5 @@ Also produces coordinates/radii that can be easily used with OpenSCAD for STL ex
 In the `scripts` folder the `apollonian.scad` file provides an easy way to export spheres to STL (or other formats).
 Simply take the output of the Spheres application, paste into the `apollonia` module.
 The default operation is to then perform a a cut along a plane, but this can be easily commented out/modified.
+
+Pretty examples: [https://www.instagram.com/virtual_fractality/]
